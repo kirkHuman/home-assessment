@@ -1,4 +1,4 @@
-## PalcoFirst Playwright E2E Tests
+## Playwright E2E Tests
 
 ### Prerequisites
 
