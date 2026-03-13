@@ -1,0 +1,85 @@
+name: Playwright with Allure
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  pull-requests: write
+  checks: write
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npm run test
+        continue-on-error: true
+
+      - name: Generate Allure report
+        run: npx allure generate allure-results -o allure-report
+        if: always()
+
+      - name: Run Allure Action (PR summary)
+        uses: allure-framework/allure-action@v0
+        if: github.event_name == 'pull_request'
+        with:
+          report-directory: "./allure-report"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Allure results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: allure-results/
+
+      - name: Upload Allure report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: allure-report/
+
+      # ── GitHub Pages deployment (push to main/master only) ──────────────────
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        if: always() && github.event_name == 'push'
+        with:
+          path: allure-report/
+
+  deploy-pages:
+    name: Deploy Allure report to GitHub Pages
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
