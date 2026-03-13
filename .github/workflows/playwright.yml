@@ -72,7 +72,6 @@ jobs:
     name: Deploy Allure report to GitHub Pages
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
