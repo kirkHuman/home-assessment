@@ -1,29 +1,22 @@
-# home-assessment
-# How to Run Palco First Playwright Tests
+## PalcoFirst Playwright E2E Tests
 
-## Prerequisites
+### Prerequisites
 
 - **Node.js** 18+
 - **npm** (comes with Node.js)
 
-## Install
+### Install locally
 
 ```bash
 npm install
-npx playwright install
-```
-
-Install only Chromium (faster):
-
-```bash
 npx playwright install chromium
 ```
 
-## Run Tests
+### Run tests locally
 
 | Command | Description |
 |--------|-------------|
-| `npm run test` | Run all tests (headless) |
+| `npm run test` | Run all tests (headless, Chromium only) |
 | `npm run test:headed` | Run with browser window visible |
 | `npm run test:ui` | Open Playwright UI mode |
 
@@ -33,41 +26,33 @@ Run a single file:
 npx playwright test tests/desktop/home.spec.ts
 ```
 
-Run one browser only:
+### Allure report locally
 
 ```bash
-npx playwright test --project=chromium
-```
-
-## Allure Report
-
-After running tests, generate and open the Allure report:
-
-```bash
+npm run test
 npm run report
 ```
 
-Or manually:
+This generates `allure-report/` and opens it in your browser.
 
-```bash
-npx allure generate allure-results -o allure-report --clean
-npx allure open allure-report
-```
+### GitHub Actions
 
-**Note:** Allure 3 is used; the `allure` package is included. No Java is required.
+- Workflow: `.github/workflows/playwright.yml`
+- Triggers:
+  - push to `main` / `master`
+  - pull requests targeting `main` / `master`
+  - **manual run** via `workflow_dispatch` (“Run workflow” button in GitHub → Actions)
+- Uses **Chromium only** in CI for speed.
+- Always uploads two artifacts: `allure-results` and `allure-report`.
+- On pull requests, the Allure Action posts a test summary comment.
 
-## GitHub Actions
+### Allure report on GitHub Pages
 
-- Workflow file: `.github/workflows/playwright.yml`
-- Runs on **push** and **pull_request** to `main` or `master`
-- Uses Chromium only in CI for speed
-- **Artifacts:** `allure-results` and `allure-report` are uploaded so you can download them from the run summary
-- On pull requests, the Allure Action posts a test summary comment
-
-## Project Layout
-
-- `pages/` – Page Object Model (BasePage, HomePage)
-- `tests/desktop/` – Desktop tests by feature
-- `playwright.config.ts` – Browsers, base URL, Allure reporter
-- `allure-results/` – Raw Allure data (after test run)
-- `allure-report/` – Generated HTML report (after `npm run report`)
+- On every push to `main` / `master`, CI:
+  - runs Playwright tests
+  - generates Allure HTML into `allure-report/`
+  - publishes `allure-report` to **GitHub Pages** using `upload-pages-artifact` + `deploy-pages`.
+- In repo **Settings → Pages**, the source must be set to **GitHub Actions**.
+- The report will then be available at:
+  - `https://<github-username>.github.io/<repo-name>/`
+  - or the exact URL shown for the `github-pages` environment in the Actions run.

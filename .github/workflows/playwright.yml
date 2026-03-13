@@ -1,17 +1,18 @@
 name: Playwright with Allure
 
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-
 permissions:
   pull-requests: write
   checks: write
   contents: write
   pages: write
   id-token: write
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   test:
