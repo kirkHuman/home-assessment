@@ -25,8 +25,10 @@ pipeline {
 
     stage('Install Playwright browsers') {
       steps {
-        // Required on fresh agents; only Chromium matches playwright.config projects
-        sh 'npx playwright install --with-deps chromium'
+        // Do not use --with-deps here: it runs apt/yum with sudo and often prompts for
+        // credentials on Jenkins. Install OS libs once on the agent image, or use a
+        // Playwright Docker image (mcr.microsoft.com/playwright).
+        sh 'npx playwright install chromium'
       }
     }
 
