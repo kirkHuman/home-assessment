@@ -23,6 +23,12 @@ pipeline {
       }
     }
 
+    stage('Install Playwright browsers') {
+      steps {
+        // Required on fresh agents; only Chromium matches playwright.config projects
+        sh 'npx playwright install --with-deps chromium'
+      }
+    }
 
     stage('Run Playwright tests') {
       steps {
