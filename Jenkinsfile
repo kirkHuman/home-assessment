@@ -32,7 +32,7 @@ pipeline {
 
     stage('Run Playwright tests') {
       steps {
-        sh 'npm run test'
+        sh 'npx playwright test'
       }
     }
 
@@ -41,7 +41,6 @@ pipeline {
         expression { sh(script: 'test -d allure-results', returnStatus: true) == 0 }
       }
       steps {
-        // Allure 3: no --clean flag (removed vs Allure 2)
         sh 'npx allure generate allure-results -o allure-report'
       }
     }
